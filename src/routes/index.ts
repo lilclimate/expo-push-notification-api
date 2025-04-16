@@ -2,6 +2,7 @@ import { Context } from 'koa';
 import Router from 'koa-router';
 import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
+import articleRoutes from './article.routes';
 
 const router = new Router();
 
@@ -20,6 +21,7 @@ const registerRoutes = (app: any) => {
   app.use(router.routes()).use(router.allowedMethods());
   app.use(authRoutes.routes()).use(authRoutes.allowedMethods());
   app.use(userRoutes.routes()).use(userRoutes.allowedMethods());
+  app.use(articleRoutes.routes()).use(articleRoutes.allowedMethods());
 };
 
 export default registerRoutes; 
