@@ -42,6 +42,14 @@ jest.mock('../src/config/database', () => ({
 // 模拟JWT验证
 jest.mock('../src/utils/jwt', () => ({
   verifyToken: jest.fn().mockReturnValue({ id: 'user-123' }),
+  generateAccessToken: jest.fn().mockReturnValue({ 
+    token: 'mock-access-token', 
+    expiresAt: Date.now() + 3600000 
+  }),
+  generateRefreshToken: jest.fn().mockReturnValue({ 
+    token: 'mock-refresh-token', 
+    expiresAt: Date.now() + 86400000 
+  }),
 }));
 
 // 模拟mongoose ObjectId

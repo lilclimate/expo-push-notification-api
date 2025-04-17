@@ -14,28 +14,69 @@ export interface TokenPayload {
   role: string;
 }
 
+export interface TokenResponse {
+  token: string;
+  expiresAt: number; // 过期时间的时间戳（毫秒）
+}
+
+// 将时间字符串转换为毫秒数
+const parseExpiryToMs = (expiry: string): number => {
+  const match = expiry.match(/^(\d+)([smhdw])$/);
+  if (!match) return 24 * 60 * 60 * 1000; // 默认24小时
+
+  const value = parseInt(match[1]);
+  const unit = match[2];
+
+  switch (unit) {
+    case 's': return value * 1000; // 秒
+    case 'm': return value * 60 * 1000; // 分钟
+    case 'h': return value * 60 * 60 * 1000; // 小时
+    case 'd': return value * 24 * 60 * 60 * 1000; // 天
+    case 'w': return value * 7 * 24 * 60 * 60 * 1000; // 周
+    default: return 24 * 60 * 60 * 1000; // 默认24小时
+  }
+};
+
 // 生成访问令牌
-export const generateAccessToken = (user: IUser): string => {
+export const generateAccessToken = (user: IUser): TokenResponse => {
   const payload: TokenPayload = {
     id: user._id.toString(),
     email: user.email,
     role: user.role,
   };
 
+  // 计算过期时间（当前时间 + 过期时间）
+  const expiryMs = parseExpiryToMs(JWT_EXPIRY);
+  const expiresAt = Date.now() + expiryMs;
+
   // 使用any临时解决类型问题
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY } as any);
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY } as any);
+  
+  return {
+    token,
+    expiresAt
+  };
 };
 
 // 生成刷新令牌
-export const generateRefreshToken = (user: IUser): string => {
+export const generateRefreshToken = (user: IUser): TokenResponse => {
   const payload: TokenPayload = {
     id: user._id.toString(),
     email: user.email,
     role: user.role,
   };
 
+  // 计算过期时间（当前时间 + 过期时间）
+  const expiryMs = parseExpiryToMs(JWT_REFRESH_EXPIRY);
+  const expiresAt = Date.now() + expiryMs;
+
   // 使用any临时解决类型问题
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_REFRESH_EXPIRY } as any);
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_REFRESH_EXPIRY } as any);
+  
+  return {
+    token,
+    expiresAt
+  };
 };
 
 // 验证令牌

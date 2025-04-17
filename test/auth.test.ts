@@ -25,6 +25,19 @@ jest.mock('../src/models/User', () => ({
   }
 }));
 
+// 模拟JWT函数
+jest.mock('../src/utils/jwt', () => ({
+  generateAccessToken: jest.fn().mockReturnValue({ 
+    token: 'dummy-access-token', 
+    expiresAt: Date.now() + 3600000 
+  }),
+  generateRefreshToken: jest.fn().mockReturnValue({ 
+    token: 'dummy-refresh-token', 
+    expiresAt: Date.now() + 86400000 
+  }),
+  verifyToken: jest.fn().mockReturnValue({ id: 'test-id', email: 'test@example.com', role: 'user' }),
+}));
+
 // 跳过实际连接数据库
 jest.mock('../src/config/database', () => ({
   connectDB: jest.fn().mockResolvedValue(undefined),

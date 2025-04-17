@@ -36,11 +36,11 @@ export const register = async (ctx: Context): Promise<void> => {
     const savedUser = await user.save();
 
     // 生成令牌
-    const accessToken = generateAccessToken(savedUser);
-    const refreshToken = generateRefreshToken(savedUser);
+    const accessTokenData = generateAccessToken(savedUser);
+    const refreshTokenData = generateRefreshToken(savedUser);
 
     // 更新用户的刷新令牌
-    savedUser.refreshToken = refreshToken;
+    savedUser.refreshToken = refreshTokenData.token;
     await savedUser.save();
 
     ctx.status = 201;
@@ -52,8 +52,10 @@ export const register = async (ctx: Context): Promise<void> => {
         email: savedUser.email,
         role: savedUser.role,
       },
-      accessToken,
-      refreshToken,
+      accessToken: accessTokenData.token,
+      accessTokenExpiresAt: accessTokenData.expiresAt,
+      refreshToken: refreshTokenData.token,
+      refreshTokenExpiresAt: refreshTokenData.expiresAt,
     };
   } catch (error) {
     ctx.status = 500;
@@ -98,11 +100,11 @@ export const login = async (ctx: Context): Promise<void> => {
     }
 
     // 生成令牌
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessTokenData = generateAccessToken(user);
+    const refreshTokenData = generateRefreshToken(user);
 
     // 更新用户的刷新令牌
-    user.refreshToken = refreshToken;
+    user.refreshToken = refreshTokenData.token;
     await user.save();
 
     ctx.status = 200;
@@ -114,8 +116,10 @@ export const login = async (ctx: Context): Promise<void> => {
         email: user.email,
         role: user.role,
       },
-      accessToken,
-      refreshToken,
+      accessToken: accessTokenData.token,
+      accessTokenExpiresAt: accessTokenData.expiresAt,
+      refreshToken: refreshTokenData.token,
+      refreshTokenExpiresAt: refreshTokenData.expiresAt,
       rememberMe: !!rememberMe,
     };
   } catch (error) {
@@ -127,16 +131,16 @@ export const login = async (ctx: Context): Promise<void> => {
 // 刷新令牌
 export const refreshToken = async (ctx: Context): Promise<void> => {
   try {
-    const { refreshToken } = ctx.request.body as { refreshToken: string };
+    const { refreshToken: requestRefreshToken } = ctx.request.body as { refreshToken: string };
 
-    if (!refreshToken) {
+    if (!requestRefreshToken) {
       ctx.status = 400;
       ctx.body = { message: '刷新令牌不能为空' };
       return;
     }
 
     // 验证刷新令牌
-    const decoded = verifyToken(refreshToken);
+    const decoded = verifyToken(requestRefreshToken);
     if (!decoded) {
       ctx.status = 401;
       ctx.body = { message: '无效或过期的刷新令牌' };
@@ -146,7 +150,7 @@ export const refreshToken = async (ctx: Context): Promise<void> => {
     // 查找用户并验证刷新令牌
     const user = await User.findOne({
       _id: decoded.id,
-      refreshToken,
+      refreshToken: requestRefreshToken,
     });
 
     if (!user || !user.isActive) {
@@ -156,17 +160,19 @@ export const refreshToken = async (ctx: Context): Promise<void> => {
     }
 
     // 生成新的令牌
-    const newAccessToken = generateAccessToken(user);
-    const newRefreshToken = generateRefreshToken(user);
+    const newAccessTokenData = generateAccessToken(user);
+    const newRefreshTokenData = generateRefreshToken(user);
 
     // 更新用户的刷新令牌
-    user.refreshToken = newRefreshToken;
+    user.refreshToken = newRefreshTokenData.token;
     await user.save();
 
     ctx.status = 200;
     ctx.body = {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
+      accessToken: newAccessTokenData.token,
+      accessTokenExpiresAt: newAccessTokenData.expiresAt,
+      refreshToken: newRefreshTokenData.token,
+      refreshTokenExpiresAt: newRefreshTokenData.expiresAt,
     };
   } catch (error) {
     ctx.status = 500;
