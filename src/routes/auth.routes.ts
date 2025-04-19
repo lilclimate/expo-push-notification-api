@@ -17,4 +17,8 @@ router.post('/refresh-token', authController.refreshToken);
 // 登出
 router.post('/logout', authController.logout);
 
+// Google OAuth路由
+router.get('/google', authController.googleAuthUrl);
+router.get('/google/callback', authController.googleCallback);
+
 export default router; 

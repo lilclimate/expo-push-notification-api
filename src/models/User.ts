@@ -6,6 +6,11 @@ export enum UserRole {
   USER = 'user',
 }
 
+export enum UserPlatform {
+  NORMAL = 1,
+  GOOGLE = 2,
+}
+
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   username: string;
@@ -14,6 +19,8 @@ export interface IUser extends Document {
   role: UserRole;
   isActive: boolean;
   refreshToken?: string;
+  platform: UserPlatform;
+  openId?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -52,6 +59,15 @@ const userSchema = new Schema<IUser>(
     },
     refreshToken: {
       type: String,
+    },
+    platform: {
+      type: Number,
+      enum: [UserPlatform.NORMAL, UserPlatform.GOOGLE],
+      default: UserPlatform.NORMAL,
+    },
+    openId: {
+      type: String,
+      default: '',
     },
   },
   {

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
-import { User, UserRole } from '../models/User';
+import { User, UserPlatform, UserRole } from '../models/User';
 
 dotenv.config();
 
@@ -28,6 +28,8 @@ export const initAdminUser = async (): Promise<void> => {
       password: hashedPassword,
       role: UserRole.ADMIN,
       isActive: true,
+      platform: UserPlatform.NORMAL,
+      openId: '',
     });
 
     await admin.save();

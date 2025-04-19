@@ -1,7 +1,9 @@
 import { Context } from 'koa';
-import { User, UserRole } from '../models/User';
+import { User, UserRole, UserPlatform } from '../models/User';
 import { registerValidation, loginValidation } from '../utils/validation';
 import { generateAccessToken, generateRefreshToken, verifyToken } from '../utils/jwt';
+import { getGoogleAuthUrl, getTokenFromCode, getGoogleUserInfo } from '../services/oauth.service';
+import { v4 as uuidv4 } from 'uuid';
 
 // 用户注册
 export const register = async (ctx: Context): Promise<void> => {
@@ -30,6 +32,7 @@ export const register = async (ctx: Context): Promise<void> => {
       email,
       password,
       role: UserRole.USER,
+      platform: UserPlatform.NORMAL,
     });
 
     // 保存用户
@@ -209,5 +212,84 @@ export const logout = async (ctx: Context): Promise<void> => {
   } catch (error) {
     ctx.status = 500;
     ctx.body = { message: '登出过程中发生错误' };
+  }
+};
+
+// 获取Google登录URL
+export const googleAuthUrl = async (ctx: Context): Promise<void> => {
+  try {
+    const url = getGoogleAuthUrl();
+    ctx.status = 200;
+    ctx.body = { url };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { message: '获取Google登录URL失败' };
+  }
+};
+
+// 处理Google OAuth回调
+export const googleCallback = async (ctx: Context): Promise<void> => {
+  try {
+    const { code } = ctx.query;
+
+    if (!code || typeof code !== 'string') {
+      ctx.status = 400;
+      ctx.body = { message: '无效的授权码' };
+      return;
+    }
+
+    // 通过授权码获取访问令牌
+    const accessToken = await getTokenFromCode(code);
+    
+    // 获取Google用户信息
+    const googleUserInfo = await getGoogleUserInfo(accessToken);
+    
+    // 检查用户是否已存在（通过Google ID）
+    let user = await User.findOne({ 
+      openId: googleUserInfo.id,
+      platform: UserPlatform.GOOGLE
+    });
+
+    // 如果用户不存在，检查是否有相同的邮箱注册
+    if (!user) {
+      const existingEmailUser = await User.findOne({ email: googleUserInfo.email });
+      
+      if (existingEmailUser) {
+        // 如果已有相同邮箱的用户，进行账号关联
+        existingEmailUser.openId = googleUserInfo.id;
+        existingEmailUser.platform = UserPlatform.GOOGLE;
+        user = await existingEmailUser.save();
+      } else {
+        // 创建新用户
+        user = new User({
+          username: googleUserInfo.name,
+          email: googleUserInfo.email,
+          password: uuidv4(), // 生成随机密码
+          role: UserRole.USER,
+          platform: UserPlatform.GOOGLE,
+          openId: googleUserInfo.id,
+        });
+        user = await user.save();
+      }
+    }
+
+    // 生成令牌
+    const accessTokenData = generateAccessToken(user);
+    const refreshTokenData = generateRefreshToken(user);
+
+    // 更新用户的刷新令牌
+    user.refreshToken = refreshTokenData.token;
+    await user.save();
+
+    // 动态获取redirectUri，默认跳转到web
+    const redirectUri = ctx.query.redirectUri || process.env.FRONTEND_REDIRECT_URI || 'https://yourweb.com/auth/callback';
+    // 安全校验：只允许跳转到白名单内的redirectUri（可选，建议实现）
+    // 这里只做简单演示
+    const redirectUrl = `${redirectUri}?accessToken=${encodeURIComponent(accessTokenData.token)}&refreshToken=${encodeURIComponent(refreshTokenData.token)}`;
+    ctx.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Google OAuth回调处理失败:', error);
+    ctx.status = 500;
+    ctx.body = { message: 'Google登录失败，请稍后重试' };
   }
 }; 
