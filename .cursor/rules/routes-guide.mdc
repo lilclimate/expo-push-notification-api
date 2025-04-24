@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# API 路由指南
+
+本项目使用 Koa Router 进行路由管理。所有路由在 [src/routes/index.ts](mdc:src/routes/index.ts) 中注册。
+
+## 主要路由：
+
+- [src/routes/auth.routes.ts](mdc:src/routes/auth.routes.ts) - 认证相关路由
+- [src/routes/user.routes.ts](mdc:src/routes/user.routes.ts) - 用户管理路由
+- [src/routes/article.routes.ts](mdc:src/routes/article.routes.ts) - 文章管理路由
+
+## 路由结构规范
+
+每个路由文件应遵循以下模式：
+1. 导入相关控制器
+2. 创建路由实例
+3. 定义路由路径和方法
+4. 导出路由

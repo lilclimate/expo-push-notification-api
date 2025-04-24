@@ -1,0 +1,28 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Expo 推送通知 API 项目概述
+
+本项目是一个基于 Koa.js 和 TypeScript 的 Expo 推送通知 API 服务。
+
+## 项目结构
+
+- [src/app.ts](mdc:src/app.ts) - 应用入口文件
+- [package.json](mdc:package.json) - 项目依赖和脚本
+
+### 核心目录：
+
+- `src/routes/` - API 路由定义
+- `src/controllers/` - 控制器逻辑
+- `src/services/` - 业务服务层
+- `src/models/` - 数据模型
+- `src/middlewares/` - 中间件
+- `src/utils/` - 工具函数
+- `src/config/` - 配置文件
+- `src/types/` - TypeScript 类型定义
+
+### 测试目录：
+
+- `test/` - 包含所有测试文件，遵循 TDD 开发方法

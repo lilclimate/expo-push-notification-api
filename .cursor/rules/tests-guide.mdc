@@ -1,0 +1,34 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 测试指南
+
+本项目采用 TDD（测试驱动开发）方法，使用 Jest 作为测试框架。
+
+## 主要测试文件：
+
+- [test/auth.test.ts](mdc:test/auth.test.ts) - 认证功能测试
+- [test/user.test.ts](mdc:test/user.test.ts) - 用户管理测试
+- [test/article.test.ts](mdc:test/article.test.ts) - 文章管理测试
+- [test/oauth.test.ts](mdc:test/oauth.test.ts) - OAuth 服务测试
+
+## 测试规范
+
+每个测试文件应包含：
+1. 相关模块的单元测试
+2. 适当的 mock 和存根
+3. 覆盖各种边缘情况
+4. 请求/响应测试（使用 supertest）
+
+### 行为驱动与数据库 mock 规范
+
+- 所有测试应采用行为驱动（BDD）风格，使用 `describe` 和 `it` 语句清晰描述行为和预期结果。
+- 所有涉及数据库操作（如 Model.create、Model.find 等）的测试，均应通过 mock（如 jest.spyOn 或 jest.mock）模拟，不实际连接数据库。
+- 对数据库相关方法，仅需断言其被调用及参数正确，无需验证真实数据写入或查询。
+- 控制器测试应 mock 服务层，服务层测试应 mock 数据模型。
+
+## 运行测试
+
+- 运行所有测试：`

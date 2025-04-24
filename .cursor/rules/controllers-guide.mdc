@@ -1,0 +1,21 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# 控制器指南
+
+控制器负责处理请求逻辑，从请求中提取数据，调用服务层，并返回响应。
+
+## 主要控制器：
+
+- [src/controllers/auth.controller.ts](mdc:src/controllers/auth.controller.ts) - 处理用户认证、登录、注册等
+- [src/controllers/user.controller.ts](mdc:src/controllers/user.controller.ts) - 用户管理操作
+- [src/controllers/article.controller.ts](mdc:src/controllers/article.controller.ts) - 文章管理操作
+
+## 控制器结构规范
+
+控制器方法应遵循以下模式：
+1. 验证请求数据
+2. 调用相应的服务或模型方法
+3. 返回标准化的响应格式

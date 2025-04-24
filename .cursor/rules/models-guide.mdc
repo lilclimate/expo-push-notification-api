@@ -1,0 +1,23 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# 数据模型指南
+
+本项目使用 Mongoose 定义数据模型，与 MongoDB 交互。
+
+## 主要模型：
+
+- [src/models/User.ts](mdc:src/models/User.ts) - 用户模型
+- [src/models/Article.ts](mdc:src/models/Article.ts) - 文章模型
+- [src/models/Role.ts](mdc:src/models/Role.ts) - 角色模型
+- [src/models/Permission.ts](mdc:src/models/Permission.ts) - 权限模型
+
+## 模型结构规范
+
+每个模型应包含：
+1. 接口定义（TypeScript 类型）
+2. Schema 定义
+3. 必要的中间件（pre/post hooks）
+4. 模型导出

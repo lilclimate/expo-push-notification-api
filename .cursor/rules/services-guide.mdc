@@ -1,0 +1,20 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# 服务层指南
+
+服务层封装核心业务逻辑，实现业务规则，并与数据模型交互。
+
+## 主要服务：
+
+- [src/services/oauth.service.ts](mdc:src/services/oauth.service.ts) - OAuth 认证服务
+
+## 服务规范
+
+服务层应：
+1. 专注于业务逻辑，不处理HTTP请求/响应
+2. 提供清晰的接口与类型定义
+3. 将数据访问与业务规则分离
+4. 易于单元测试
