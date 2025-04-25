@@ -180,22 +180,30 @@ export class FollowService {
 
   /**
    * 检查关注状态
-   * @param followerId 关注者ID
-   * @param followingId 被关注者ID
+   * @param id 查询用户id
+   * @param targetId 目标用户id
    * @returns 是否已关注
    */
-  async checkFollowStatus(followerId: string, followingId: string): Promise<boolean> {
+  async checkFollowStatus(id: string, targetId: string): Promise<{ isFollowing: boolean, isFollower: boolean }> {
     // 验证用户IDs格式
-    if (!mongoose.isValidObjectId(followerId) || !mongoose.isValidObjectId(followingId)) {
+    if (!mongoose.isValidObjectId(id) || !mongoose.isValidObjectId(targetId)) {
       throw new BadRequestError('无效的用户ID');
     }
 
-    const count = await Follow.countDocuments({
-      follower: followerId,
-      following: followingId
-    });
+    const isFollowing = await Follow.countDocuments({
+      follower: id,
+      following:targetId 
+    }) > 0;
 
-    return count > 0;
+    const isFollower = await Follow.countDocuments({
+      follower: targetId,
+      following: id, 
+    }) > 0;
+
+    return {
+      isFollowing,
+      isFollower
+    };
   }
 
   /**

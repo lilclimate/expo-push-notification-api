@@ -134,7 +134,7 @@ export class FollowController {
       throw new BadRequestError('目标用户ID是必须的');
     }
 
-    const isFollowing = await followService.checkFollowStatus(
+    const {isFollowing, isFollower} = await followService.checkFollowStatus(
       followerId,
       id as string
     );
@@ -143,7 +143,7 @@ export class FollowController {
       code: 0,
       message: 'success',
       data: {
-        isFollowing
+        isFollowing, isFollower
       }
     };
   }
