@@ -155,6 +155,48 @@ export class ArticleController {
     }
   }
 
+  static async getUserArticles(ctx: Context): Promise<void> {
+    try {
+      const {userId} = ctx.params;
+      const page = parseInt(ctx.query.page as string) || 1;
+      const limit = parseInt(ctx.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+
+      // 只查询当前登录用户的文章（包括已删除的文章，可以通过查询参数控制）
+      const showDeleted = ctx.query.showDeleted === 'true';
+      const query = { userId };
+      
+      if (!showDeleted) {
+        Object.assign(query, { isDeleted: false });
+      }
+
+      const articles = await Article.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', 'username email'); // 关联用户信息
+
+      const total = await Article.countDocuments(query);
+
+      ctx.status = 200;
+      ctx.body = {
+        message: '获取用户的文章列表成功',
+        data: {
+          articles,
+          pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+          },
+        },
+      };
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = { message: '获取用户的文章列表失败', error: (error as Error).message };
+    }
+  }
+
   // 获取单篇文章详情
   static async getArticleById(ctx: Context): Promise<void> {
     try {

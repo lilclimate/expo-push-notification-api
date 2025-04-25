@@ -4,6 +4,7 @@
   "main": "dist/app.js",
   "license": "MIT",
   "scripts": {
+    "predev": "fuser -k 3000/tcp || true",
     "start": "node dist/app.js",
     "dev": "nodemon --exec ts-node src/app.ts",
     "build": "tsc",

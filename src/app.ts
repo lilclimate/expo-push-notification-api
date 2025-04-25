@@ -31,6 +31,11 @@ registerRoutes(app);
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`服务器运行在 http://localhost:${PORT}`);
+}).on('error', (err: any) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`端口 ${PORT} 已被占用，自动退出进程...`);
+    process.exit(1);
+  }
 });
 
 // 处理未捕获的异常
