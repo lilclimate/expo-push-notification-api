@@ -138,12 +138,21 @@ export class FollowController {
       followerId,
       id as string
     );
+    
+    let relationType = 0;
+    if (isFollowing && isFollower) {
+      relationType = 1;
+    } else if (isFollowing) {
+      relationType = 2;
+    } else if (isFollower) {
+      relationType = 3;
+    }
 
     ctx.body = {
       code: 0,
       message: 'success',
       data: {
-        isFollowing, isFollower
+        relationType
       }
     };
   }
