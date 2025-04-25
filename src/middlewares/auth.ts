@@ -22,6 +22,7 @@ export const authMiddleware = async (ctx: Context, next: Next): Promise<void> =>
     }
 
     const user = await User.findById(decoded.id);
+    console.log(user, '--------user-----------');
     if (!user || !user.isActive) {
       ctx.status = 401;
       ctx.body = { message: '用户不存在或已被禁用' };
@@ -31,6 +32,7 @@ export const authMiddleware = async (ctx: Context, next: Next): Promise<void> =>
     ctx.user = user;
     await next();
   } catch (error) {
+    console.error('认证失败------------:', error);
     ctx.status = 401;
     ctx.body = { message: '认证失败' };
   }

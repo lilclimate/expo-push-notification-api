@@ -10,6 +10,7 @@ router.get('/', ArticleController.getArticles);
 // 获取我的文章列表（分页，需登录）
 router.get('/my', authMiddleware, ArticleController.getMyArticles);
 
+
 // 获取文章详情（公开）
 router.get('/:id', ArticleController.getArticleById);
 
