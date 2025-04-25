@@ -127,16 +127,16 @@ export class FollowController {
    * @param ctx Koa上下文
    */
   async checkFollowStatus(ctx: Context): Promise<void> {
-    const { target } = ctx.query;
-    const followerId = ctx.state.user._id;
+    const { id } = ctx.params;
+    const followerId = ctx.user?._id ? ctx.user._id.toString() : '';
 
-    if (!target) {
+    if (!id) {
       throw new BadRequestError('目标用户ID是必须的');
     }
 
     const isFollowing = await followService.checkFollowStatus(
       followerId,
-      target as string
+      id as string
     );
 
     ctx.body = {
