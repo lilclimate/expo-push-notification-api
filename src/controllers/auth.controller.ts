@@ -230,7 +230,9 @@ export const googleAuthUrl = async (ctx: Context): Promise<void> => {
 // 处理Google OAuth回调
 export const googleCallback = async (ctx: Context): Promise<void> => {
   try {
+    console.log('----enter--------')
     const { code } = ctx.query;
+    console.log('--------code--------', code)
 
     if (!code || typeof code !== 'string') {
       ctx.status = 400;
@@ -240,9 +242,11 @@ export const googleCallback = async (ctx: Context): Promise<void> => {
 
     // 通过授权码获取访问令牌
     const accessToken = await getTokenFromCode(code);
+    console.log('--------accessToken--------', accessToken)
     
     // 获取Google用户信息
     const googleUserInfo = await getGoogleUserInfo(accessToken);
+    console.log('--------googleUserInfo--------', googleUserInfo)
     
     // 检查用户是否已存在（通过Google ID）
     let user = await User.findOne({ 
@@ -258,6 +262,7 @@ export const googleCallback = async (ctx: Context): Promise<void> => {
         // 如果已有相同邮箱的用户，进行账号关联
         existingEmailUser.openId = googleUserInfo.id;
         existingEmailUser.platform = UserPlatform.GOOGLE;
+        existingEmailUser.picture = googleUserInfo.picture;
         user = await existingEmailUser.save();
       } else {
         // 创建新用户
@@ -268,6 +273,7 @@ export const googleCallback = async (ctx: Context): Promise<void> => {
           role: UserRole.USER,
           platform: UserPlatform.GOOGLE,
           openId: googleUserInfo.id,
+          picture: googleUserInfo.picture,
         });
         user = await user.save();
       }

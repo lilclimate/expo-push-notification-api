@@ -21,6 +21,7 @@ export interface IUser extends Document {
   refreshToken?: string;
   platform: UserPlatform;
   openId?: string;
+  picture?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -66,6 +67,10 @@ const userSchema = new Schema<IUser>(
       default: UserPlatform.NORMAL,
     },
     openId: {
+      type: String,
+      default: '',
+    },
+    picture: {
       type: String,
       default: '',
     },
