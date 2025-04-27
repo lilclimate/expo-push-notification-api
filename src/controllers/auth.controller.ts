@@ -230,10 +230,7 @@ export const googleAuthUrl = async (ctx: Context): Promise<void> => {
 // 处理Google OAuth回调
 export const googleCallback = async (ctx: Context): Promise<void> => {
   try {
-    console.log('----enter--------')
     const { code } = ctx.query;
-    console.log('--------code--------', code)
-
     if (!code || typeof code !== 'string') {
       ctx.status = 400;
       ctx.body = { message: '无效的授权码' };
@@ -242,11 +239,8 @@ export const googleCallback = async (ctx: Context): Promise<void> => {
 
     // 通过授权码获取访问令牌
     const accessToken = await getTokenFromCode(code);
-    console.log('--------accessToken--------', accessToken)
-    
     // 获取Google用户信息
     const googleUserInfo = await getGoogleUserInfo(accessToken);
-    console.log('--------googleUserInfo--------', googleUserInfo)
     
     // 检查用户是否已存在（通过Google ID）
     let user = await User.findOne({ 
@@ -288,11 +282,25 @@ export const googleCallback = async (ctx: Context): Promise<void> => {
     await user.save();
 
     // 动态获取redirectUri，默认跳转到web
-    const redirectUri = ctx.query.redirectUri || process.env.FRONTEND_REDIRECT_URI || 'https://yourweb.com/auth/callback';
+    // const redirectUri = ctx.query.redirectUri || process.env.FRONTEND_REDIRECT_URI || 'https://yourweb.com/auth/callback';
     // 安全校验：只允许跳转到白名单内的redirectUri（可选，建议实现）
     // 这里只做简单演示
-    const redirectUrl = `${redirectUri}?accessToken=${encodeURIComponent(accessTokenData.token)}&refreshToken=${encodeURIComponent(refreshTokenData.token)}`;
-    ctx.redirect(redirectUrl);
+    // const redirectUrl = `${redirectUri}?accessToken=${encodeURIComponent(accessTokenData.token)}&refreshToken=${encodeURIComponent(refreshTokenData.token)}`;
+    // ctx.redirect(redirectUrl);
+    ctx.status = 200;
+    ctx.body = {
+      message: '登录成功',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken: accessTokenData.token,
+      accessTokenExpiresAt: accessTokenData.expiresAt,
+      refreshToken: refreshTokenData.token,
+      refreshTokenExpiresAt: refreshTokenData.expiresAt,
+    };
   } catch (error) {
     console.error('Google OAuth回调处理失败:', error);
     ctx.status = 500;
